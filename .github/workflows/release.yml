@@ -29,6 +29,7 @@ jobs:
         run: |
           if ($env:VERSION -cnotmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Expected vMAJOR.MINOR.PATCH' }
           $zip = "StarCitizenTelemetrySimulator-$env:VERSION-win-x64.zip"
+          Copy-Item LICENSE publish/LICENSE.txt
           Compress-Archive -Path publish/* -DestinationPath $zip
           "$((Get-FileHash $zip -Algorithm SHA256).Hash.ToLower())  $zip" | Set-Content SHA256SUMS.txt -Encoding ascii
           gh release create $env:VERSION $zip SHA256SUMS.txt --target $env:GITHUB_SHA --title "Telemetry Simulator $env:VERSION" --generate-notes

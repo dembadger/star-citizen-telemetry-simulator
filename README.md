@@ -7,3 +7,7 @@ Download the ZIP from [Releases](../../releases), extract it and run `StarCitize
 ## Development
 
 Use the .NET 10 SDK on Windows. Run `dotnet run --project src/TelemetrySimulator` to launch the simulator. Feature branches target main through pull requests. CI starts the simulator and checks a frame with a separate gRPC client. Use Actions → Release simulator on main to publish a self-contained build and its SHA-256 checksum.
+
+## Licence
+
+The simulator's original code is available under the [MIT License](LICENSE). The [protocol definition](proto/star_citizen_telemetry.proto) records the source used for its wire identifiers. Third-party materials retain their own terms.
