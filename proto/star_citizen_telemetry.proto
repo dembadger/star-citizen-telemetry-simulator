@@ -1,0 +1,157 @@
+// Minimal client schema for read-only Star Citizen telemetry.
+// Field numbers and service name follow the community-extracted schema documented at:
+// https://github.com/Sokren/sc-telemetry-deck/tree/main/schema
+syntax = "proto3";
+
+package sc.game.telemetry.v1;
+option csharp_namespace = "StarCitizenMobiGlass.Telemetry.Generated";
+
+enum VehicleComponentDeploymentState {
+  VEHICLE_COMPONENT_DEPLOYMENT_STATE_UNSPECIFIED = 0;
+  VEHICLE_COMPONENT_DEPLOYMENT_STATE_RETRACTED = 1;
+  VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYING = 2;
+  VEHICLE_COMPONENT_DEPLOYMENT_STATE_DEPLOYED = 3;
+  VEHICLE_COMPONENT_DEPLOYMENT_STATE_RETRACTING = 4;
+}
+
+enum VehicleMasterMode {
+  VEHICLE_MASTER_MODE_UNSPECIFIED = 0;
+  VEHICLE_MASTER_MODE_NAVIGATION = 1;
+  VEHICLE_MASTER_MODE_SCM = 2;
+  VEHICLE_MASTER_MODE_STEALTH = 3;
+}
+
+enum ActorLocomotionState {
+  ACTOR_LOCOMOTION_STATE_UNSPECIFIED = 0;
+  ACTOR_LOCOMOTION_STATE_ON_FOOT = 1;
+  ACTOR_LOCOMOTION_STATE_EVA = 2;
+  ACTOR_LOCOMOTION_STATE_SEATED = 3;
+}
+
+enum ActorCrewRole {
+  ACTOR_CREW_ROLE_UNSPECIFIED = 0;
+  ACTOR_CREW_ROLE_PILOT = 1;
+  ACTOR_CREW_ROLE_GUNNER = 2;
+  ACTOR_CREW_ROLE_CREW = 3;
+}
+
+message Gauge {
+  float current = 1;
+  float max = 2;
+}
+
+message VehicleComponentDeploymentStateValue {
+  VehicleComponentDeploymentState value = 1;
+}
+
+message VehicleFlightState {
+  bool is_landed = 1;
+  optional VehicleComponentDeploymentState gear = 2;
+  optional VehicleComponentDeploymentState vtol = 3;
+}
+
+message VehicleThrusterBoost {
+  bool engaged = 1;
+  float output = 2;
+  float reserves = 3;
+  bool critical = 4;
+}
+
+message VehicleFlightInstruments {
+  float speed = 1;
+  optional float hydrogen_fuel = 2;
+  optional float quantum_fuel = 3;
+  optional Gauge g_meter = 4;
+  VehicleThrusterBoost boost = 5;
+  optional float altitude = 6;
+  optional float radar_altitude = 7;
+  optional float vertical_speed_indicator = 8;
+  optional float atmospheric_density = 9;
+  optional float heading = 10;
+}
+
+message VehicleFlight {
+  VehicleFlightState state = 1;
+  VehicleFlightInstruments instruments = 3;
+}
+
+message VehicleShields {
+  float level = 1;
+  repeated float faces = 2;
+}
+
+message VehicleMasterModeState {
+  VehicleMasterMode mode = 1;
+  bool spooled = 2;
+}
+
+message VehicleState {
+  string name = 1;
+  string class_name = 2;
+  string manufacturer = 3;
+  int32 type = 4;
+  bool lights_enabled = 5;
+  VehicleFlight flight = 8;
+  VehicleShields shields = 10;
+  optional float health = 11;
+  VehicleMasterModeState master_mode = 12;
+}
+
+message VehicleFrame {
+  VehicleState state = 2;
+}
+
+message ActorVitals {
+  Gauge health = 1;
+  Gauge oxygen = 2;
+  Gauge hunger = 3;
+  Gauge thirst = 4;
+  Gauge body_temperature = 5;
+  float heart_rate = 7;
+  float gravity = 8;
+  float pressure = 9;
+  int32 intoxication_level = 10;
+}
+
+message ActorState {
+  ActorLocomotionState locomotion = 1;
+  ActorCrewRole crew_role = 2;
+  string seat_name = 3;
+  int64 uec_balance = 4;
+}
+
+message ActorEnvironment {
+  float external_temperature = 1;
+  float ambient_radiation_rate = 2;
+  bool breathable_atmosphere = 3;
+}
+
+message ActorFrame {
+  ActorVitals vitals = 1;
+  ActorState state = 2;
+  ActorEnvironment environment = 3;
+}
+
+message TelemetryStreamRequest {}
+
+message TelemetryStreamResponse {
+  VehicleFrame vehicle = 3;
+  ActorFrame actor = 6;
+}
+
+message ListTriggerableActionsRequest {}
+
+message TriggerableAction {
+  string action_name = 1;
+  string category = 2;
+  bool holdable = 3;
+}
+
+message ListTriggerableActionsResponse {
+  repeated TriggerableAction actions = 1;
+}
+
+service GameTelemetryService {
+  rpc ListTriggerableActions(ListTriggerableActionsRequest) returns (ListTriggerableActionsResponse);
+  rpc TelemetryStream(TelemetryStreamRequest) returns (stream TelemetryStreamResponse);
+}
